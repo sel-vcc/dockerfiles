@@ -1,14 +1,12 @@
 REPO = slarkin
 VERSION := $(shell date -u +"%Y%m%d-%H%M")
+IMAGES := $(basename $(wildcard *.dockerfile))
+TARGETS := $(addprefix build-,$(IMAGES)) $(addprefix push-,$(IMAGES))
 
-all: tcpdump curl
+all: $(TARGETS)
 
-.PHONY: tcpdump
-tcpdump:
-	docker build -f tcpdump/Dockerfile -t $(REPO)/tcpdump-alpine:$(VERSION) tcpdump
-	docker push $(REPO)/tcpdump-alpine:$(VERSION)
+build-%:
+	docker build -f $*.dockerfile -t $(REPO)/$*:$(VERSION) .
 
-.PHONY: curl
-curl:
-	docker build -f curl/Dockerfile -t $(REPO)/curl-alpine:$(VERSION) curl
-	docker push $(REPO)/curl-alpine:$(VERSION)
+push-%:
+	docker push $(REPO)/$*:$(VERSION)
