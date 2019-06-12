@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-forward
+  labels:
+    app: db-forward
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db-forward
+  template:
+    metadata:
+      labels:
+        app: db-forward
+    spec:
+      containers:
+        - name: socat
+          image: slarkin/socat:20190612-1200
+          ports:
+            - containerPort: 3306
+          env:
+            - name: LOCAL_PORT
+              value: "3306"
+            - name: REMOTE_HOST
+              value: "<<CHANGEME_RDS_DB_ENDPOINT_ADDRESS>>"
+            - name: REMOTE_PORT
+              value: "3306"
+          args:
+            - tcp-l:$(LOCAL_PORT),fork,reuseaddr
+            - tcp:$(REMOTE_HOST):$(REMOTE_PORT)
